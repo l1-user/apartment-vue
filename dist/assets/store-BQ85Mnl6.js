@@ -1,0 +1,1 @@
+import{i as t}from"./axios-BG9e-cZm.js";const o={getAll:()=>t.get("/store/showAll"),getPage:e=>t.get("/store/page",{params:e}),getById:e=>t.get(`/store/${e}`),save:e=>t.post("/store/save",e),update:e=>t.put("/store/update",e),delete:e=>t.delete(`/store/${e}`),count:()=>t.get("/store/count")};export{o as s};
