@@ -100,6 +100,26 @@
             </el-table-column>
           </el-table>
         </div>
+
+        <div class="section">
+          <h2 class="section-title">维修工单</h2>
+          <el-table :data="maintenanceOrders" border>
+            <el-table-column prop="orderNo" label="工单编号" />
+            <el-table-column prop="category" label="分类" />
+            <el-table-column prop="orderStatus" label="状态">
+              <template #default="scope">
+                <el-tag :type="getOrderStatusType(scope.row.orderStatus)">
+                  {{ getOrderStatusText(scope.row.orderStatus) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作">
+              <template #default="scope">
+                <el-button size="small" @click="showMaintenanceDetail(scope.row)">查看详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </div>
 
       <div class="content-right">
@@ -118,22 +138,19 @@
               <HomeFilled />
               <span>浏览房源</span>
             </el-button>
+            <el-button @click="showPasswordModal = true" class="action-btn">
+              <Key />
+              <span>修改密码</span>
+            </el-button>
+            <el-button @click="showBookingModal = true" class="action-btn">
+              <HomeFilled />
+              <span>租赁申请</span>
+            </el-button>
+            <el-button @click="showPaymentModal = true" class="action-btn">
+              <Wallet />
+              <span>在线缴费</span>
+            </el-button>
           </div>
-        </div>
-
-        <div class="section">
-          <h2 class="section-title">维修工单</h2>
-          <el-table :data="maintenanceOrders" border>
-            <el-table-column prop="orderNo" label="工单编号" />
-            <el-table-column prop="category" label="分类" />
-            <el-table-column prop="orderStatus" label="状态">
-              <template #default="scope">
-                <el-tag :type="getOrderStatusType(scope.row.orderStatus)">
-                  {{ getOrderStatusText(scope.row.orderStatus) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
         </div>
       </div>
     </div>
@@ -344,14 +361,134 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 维修工单详情弹窗 -->
+    <el-dialog title="工单详情" v-model="showMaintenanceDetailModal" width="500px">
+      <div class="detail-container" v-if="selectedMaintenanceOrder">
+        <div class="detail-row">
+          <span class="detail-label">工单编号：</span>
+          <span class="detail-value">{{ selectedMaintenanceOrder.orderNo }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">分类：</span>
+          <span class="detail-value">{{ selectedMaintenanceOrder.category }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">紧急程度：</span>
+          <span class="detail-value">{{ getUrgencyLevelText(selectedMaintenanceOrder.urgencyLevel) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">问题描述：</span>
+          <span class="detail-value">{{ selectedMaintenanceOrder.description }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">状态：</span>
+          <span class="detail-value">{{ getOrderStatusText(selectedMaintenanceOrder.orderStatus) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">上报时间：</span>
+          <span class="detail-value">{{ selectedMaintenanceOrder.reportTime }}</span>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 修改密码弹窗 -->
+    <el-dialog title="修改密码" v-model="showPasswordModal" width="450px">
+      <el-form :model="passwordForm" label-width="100px">
+        <el-form-item label="原密码">
+          <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
+        </el-form-item>
+        <el-form-item label="新密码">
+          <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" show-password />
+        </el-form-item>
+        <el-form-item label="确认密码">
+          <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showPasswordModal = false">取消</el-button>
+        <el-button type="primary" @click="handleChangePassword">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 租赁申请弹窗 -->
+    <el-dialog title="租赁申请" v-model="showBookingModal" width="500px">
+      <el-form :model="bookingForm" label-width="100px">
+        <el-form-item label="选择房间">
+          <el-select v-model="bookingForm.roomId" placeholder="请选择要租赁的房间">
+            <el-option v-for="room in availableRooms" :key="room.id" :label="room.roomNo" :value="room.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="房间信息" v-if="selectedBookingRoom">
+          <el-input :value="selectedBookingRoom.roomNo + ' - ' + selectedBookingRoom.roomTypeName" disabled />
+        </el-form-item>
+        <el-form-item label="租期(月)">
+          <el-select v-model="bookingForm.leaseTerm" placeholder="请选择租期">
+            <el-option label="3个月" :value="3" />
+            <el-option label="6个月" :value="6" />
+            <el-option label="12个月" :value="12" />
+            <el-option label="24个月" :value="24" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="月租金" v-if="selectedBookingRoom">
+          <el-input :value="selectedBookingRoom?.rentAmount" disabled />
+        </el-form-item>
+        <el-form-item label="押金" v-if="selectedBookingRoom">
+          <el-input :value="selectedBookingRoom?.depositAmount" disabled />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input type="textarea" v-model="bookingForm.remark" placeholder="请输入备注信息" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showBookingModal = false">取消</el-button>
+        <el-button type="primary" @click="handleBookingSubmit">提交申请</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 在线缴费弹窗 -->
+    <el-dialog title="在线缴费" v-model="showPaymentModal" width="500px">
+      <el-form :model="paymentForm" label-width="100px">
+        <el-form-item label="选择账单">
+          <el-select v-model="paymentForm.billNo" placeholder="请选择要缴费的账单">
+            <el-option v-for="bill in unpaidBills" :key="bill.billNo" :label="bill.billNo + ' - ' + bill.billTypeText + ' - ¥' + formatAmount(bill.finalAmount)" :value="bill.billNo" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="账单类型" v-if="selectedBill">
+          <el-input :value="selectedBill?.billTypeText" disabled />
+        </el-form-item>
+        <el-form-item label="应付金额" v-if="selectedBill">
+          <el-input :value="formatAmount(selectedBill?.finalAmount)" disabled />
+        </el-form-item>
+        <el-form-item label="已付金额" v-if="selectedBill">
+          <el-input :value="formatAmount(selectedBill?.paidAmount)" disabled />
+        </el-form-item>
+        <el-form-item label="待付金额" v-if="selectedBill">
+          <el-input :value="formatAmount(paymentForm.amount)" disabled />
+        </el-form-item>
+        <el-form-item label="支付方式">
+          <el-select v-model="paymentForm.paymentMethod">
+            <el-option label="支付宝" value="alipay" />
+            <el-option label="微信支付" value="wechat" />
+            <el-option label="银行卡" value="bank_transfer" />
+            <el-option label="现金" value="cash" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showPaymentModal = false">取消</el-button>
+        <el-button type="primary" @click="handlePaymentSubmit">确认缴费</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { User, CircleCheck, Key, Tools, ArrowRight, HomeFilled } from '@element-plus/icons-vue'
-import { tenantPortalApi } from '@/api/tenantPortal'
+import { ref, onMounted, watch } from 'vue'
+import { User, CircleCheck, Key, Tools, ArrowRight, HomeFilled, Wallet } from '@element-plus/icons-vue'
+import { tenantPortalApi, bookingApi, paymentApi } from '@/api/tenantPortal'
 import { maintenanceOrderApi } from '@/api/maintenanceOrder'
+import { authApi } from '@/api/auth'
 import type { LoginResponse } from '@/api/auth'
 
 const userInfo = ref<LoginResponse['data'] | null>(null)
@@ -364,6 +501,7 @@ const stats = ref({
 })
 const contracts = ref<any[]>([])
 const pendingBills = ref<any[]>([])
+const bills = ref<any[]>([])
 const maintenanceOrders = ref<any[]>([])
 const availableRooms = ref<any[]>([])
 const currentRoom = ref<any>(null)
@@ -374,9 +512,14 @@ const showRoomsModal = ref(false)
 const showRoomDetailModal = ref(false)
 const showContractDetailModal = ref(false)
 const showBillDetailModal = ref(false)
+const showMaintenanceDetailModal = ref(false)
+const showPasswordModal = ref(false)
+const showBookingModal = ref(false)
+const showPaymentModal = ref(false)
 const selectedRoom = ref<any>(null)
 const selectedContract = ref<any>(null)
 const selectedBill = ref<any>(null)
+const selectedMaintenanceOrder = ref<any>(null)
 
 const maintenanceForm = ref({
   orderNo: '',
@@ -394,6 +537,105 @@ const maintenanceForm = ref({
 const checkoutForm = ref({
   expectedCheckoutDate: '',
   reason: ''
+})
+
+const bookingForm = ref({
+  roomId: '',
+  leaseTerm: 12,
+  remark: ''
+})
+
+const selectedBookingRoom = ref<any>(null)
+
+const paymentForm = ref({
+  billNo: '',
+  paymentMethod: 'alipay',
+  amount: 0
+})
+
+const unpaidBills = ref<any[]>([])
+
+const formatAmount = (amount: any): string => {
+  if (amount == null || amount === undefined) {
+    return '0'
+  }
+  return Number(amount).toFixed(2)
+}
+
+const loadUnpaidBills = () => {
+  unpaidBills.value = bills.value.filter(bill => bill.billStatus !== 3 && bill.billStatus !== 5)
+  unpaidBills.value.forEach(bill => {
+    const billTypes: Record<number, string> = {
+      1: '租金',
+      2: '押金',
+      3: '水电费',
+      4: '物业费',
+      5: '网络费',
+      6: '维修费',
+      7: '违约金',
+      8: '其他'
+    }
+    bill.billTypeText = billTypes[bill.billType] || '其他'
+    
+    const finalAmount = bill.finalAmount != null ? Number(bill.finalAmount) : (bill.amount != null ? Number(bill.amount) : 0)
+    const paidAmount = bill.paidAmount != null ? Number(bill.paidAmount) : 0
+    bill.unpaidAmount = finalAmount - paidAmount
+    bill.displayAmount = finalAmount
+  })
+}
+
+watch(() => paymentForm.value.billNo, (newBillNo) => {
+  if (newBillNo) {
+    selectedBill.value = unpaidBills.value.find(bill => bill.billNo === newBillNo)
+    if (selectedBill.value) {
+      paymentForm.value.amount = selectedBill.value.unpaidAmount
+    }
+  } else {
+    selectedBill.value = null
+    paymentForm.value.amount = 0
+  }
+})
+
+const handlePaymentSubmit = async () => {
+  if (!paymentForm.value.billNo) {
+    alert('请选择要缴费的账单')
+    return
+  }
+  if (!paymentForm.value.paymentMethod) {
+    alert('请选择支付方式')
+    return
+  }
+  
+  try {
+    const response = await paymentApi.pay({
+      userId: userInfo.value?.userId || 0,
+      billNo: paymentForm.value.billNo,
+      paymentMethod: paymentForm.value.paymentMethod,
+      amount: paymentForm.value.amount
+    })
+    
+    if (response.success) {
+      alert(response.message)
+      showPaymentModal.value = false
+      paymentForm.value = {
+        billNo: '',
+        paymentMethod: 'alipay',
+        amount: 0
+      }
+      loadData()
+    } else {
+      alert(response.message || '缴费失败')
+    }
+  } catch (error) {
+    console.error('缴费失败:', error)
+    alert('缴费失败，请稍后重试')
+  }
+}
+
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
 })
 
 const handleLogout = () => {
@@ -495,6 +737,20 @@ const getOrderStatusText = (status: number) => {
   return texts[status] || '未知'
 }
 
+const getUrgencyLevelText = (level: number) => {
+  const texts: Record<number, string> = {
+    1: '紧急',
+    2: '一般',
+    3: '低'
+  }
+  return texts[level] || '一般'
+}
+
+const showMaintenanceDetail = (order: any) => {
+  selectedMaintenanceOrder.value = order
+  showMaintenanceDetailModal.value = true
+}
+
 const submitMaintenance = async () => {
   if (!maintenanceForm.value.category) {
     alert('请选择类别')
@@ -554,6 +810,88 @@ const submitCheckout = async () => {
   }
 }
 
+const handleChangePassword = async () => {
+  // 验证输入
+  if (!passwordForm.value.oldPassword) {
+    alert('请输入原密码')
+    return
+  }
+  if (!passwordForm.value.newPassword) {
+    alert('请输入新密码')
+    return
+  }
+  if (passwordForm.value.newPassword.length < 6) {
+    alert('新密码长度不能少于6位')
+    return
+  }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    alert('两次输入的新密码不一致')
+    return
+  }
+  
+  try {
+    const response = await authApi.changePassword({
+      userId: userInfo.value?.userId || 0,
+      oldPassword: passwordForm.value.oldPassword,
+      newPassword: passwordForm.value.newPassword
+    })
+    
+    if (response.success) {
+      alert('密码修改成功')
+      showPasswordModal.value = false
+      passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
+    } else {
+      alert(response.message || '密码修改失败')
+    }
+  } catch (error) {
+    console.error('密码修改失败:', error)
+    alert('密码修改失败，请稍后重试')
+  }
+}
+
+watch(() => bookingForm.value.roomId, (newRoomId) => {
+  if (newRoomId) {
+    selectedBookingRoom.value = availableRooms.value.find(room => room.id === newRoomId)
+  } else {
+    selectedBookingRoom.value = null
+  }
+})
+
+const handleBookingSubmit = async () => {
+  if (!bookingForm.value.roomId) {
+    alert('请选择要租赁的房间')
+    return
+  }
+  if (!bookingForm.value.leaseTerm) {
+    alert('请选择租期')
+    return
+  }
+  
+  try {
+    const response = await bookingApi.submitBooking({
+      userId: userInfo.value?.userId || 0,
+      roomId: bookingForm.value.roomId,
+      leaseTerm: bookingForm.value.leaseTerm,
+      remark: bookingForm.value.remark
+    })
+    
+    if (response.success) {
+      alert(response.message)
+      showBookingModal.value = false
+      bookingForm.value = {
+        roomId: '',
+        leaseTerm: 12,
+        remark: ''
+      }
+    } else {
+      alert(response.message || '提交失败')
+    }
+  } catch (error) {
+    console.error('租赁申请失败:', error)
+    alert('租赁申请失败，请稍后重试')
+  }
+}
+
 const loadData = async () => {
   const token = localStorage.getItem('token')
   if (!token) return
@@ -575,9 +913,11 @@ const loadData = async () => {
         contracts.value = contractsRes.data.slice(0, 5)
       }
 
-      const billsRes = await tenantPortalApi.getTenantBills(userInfo.value.userId, 1, 5)
+      const billsRes = await tenantPortalApi.getTenantBills(userInfo.value.userId, 1, 100)
       if (billsRes.success) {
         pendingBills.value = billsRes.data.records || []
+        bills.value = billsRes.data.records || []
+        loadUnpaidBills()
       }
 
       const ordersRes = await tenantPortalApi.getTenantMaintenanceOrders(userInfo.value.userId)

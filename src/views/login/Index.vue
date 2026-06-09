@@ -11,11 +11,19 @@
         
         <el-form :model="form" class="login-form">
           <el-form-item>
-            <el-input v-model="form.username" placeholder="请输入用户名" prefix-icon="User" size="large" />
+            <el-input v-model="form.username" placeholder="请输入用户名" size="large">
+              <template #prefix>
+                <ElIcon><User /></ElIcon>
+              </template>
+            </el-input>
           </el-form-item>
           
           <el-form-item>
-            <el-input v-model="form.password" type="password" placeholder="请输入密码" prefix-icon="Lock" size="large" show-password />
+            <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" show-password>
+              <template #prefix>
+                <ElIcon><Lock /></ElIcon>
+              </template>
+            </el-input>
           </el-form-item>
           
           <el-form-item>
@@ -36,7 +44,8 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElIcon } from 'element-plus'
+import { User, Lock } from '@element-plus/icons-vue'
 import { authApi } from '@/api/auth'
 
 const form = reactive({

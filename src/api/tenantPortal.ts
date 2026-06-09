@@ -1,5 +1,39 @@
 import request from './axios'
 
+export const bookingApi = {
+  submitBooking(data: { userId: number; roomId: number; leaseTerm: number; remark?: string }): Promise<any> {
+    return request({
+      url: '/booking/apply',
+      method: 'post',
+      data
+    })
+  },
+  
+  getBookingList(userId: number): Promise<any> {
+    return request({
+      url: `/booking/list/${userId}`,
+      method: 'get'
+    })
+  }
+}
+
+export const paymentApi = {
+  pay(data: { userId: number; billNo: string; paymentMethod: string; amount: number }): Promise<any> {
+    return request({
+      url: '/payment/pay',
+      method: 'post',
+      data
+    })
+  },
+  
+  getPaymentRecords(userId: number): Promise<any> {
+    return request({
+      url: `/payment/records/${userId}`,
+      method: 'get'
+    })
+  }
+}
+
 export const tenantPortalApi = {
   getTenantStats(tenantId: number): Promise<any> {
     return request({

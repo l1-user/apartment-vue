@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElContainer, ElAside, ElHeader, ElMain, ElMenu, ElSubMenu, ElMenuItem, ElButton, ElIcon } from 'element-plus'
-import { Menu as IconMenu, Histogram, House, User, Key, Money, SwitchButton, Tools, DataAnalysis, Logout } from '@element-plus/icons-vue'
+import { Menu as IconMenu, Histogram, House, User, Key, Money, SwitchButton, Tools, DataAnalysis } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -99,6 +99,11 @@ const handleLogout = () => {
             <el-icon><DataAnalysis /></el-icon>
             <template #title>财务报表</template>
           </el-menu-item>
+
+          <el-menu-item index="/system/log" @click="handleMenuClick('/system/log')">
+            <el-icon><Tools /></el-icon>
+            <template #title>操作日志</template>
+          </el-menu-item>
         </el-menu>
       </div>
     </el-aside>
@@ -106,7 +111,9 @@ const handleLogout = () => {
     <el-container class="main-container">
       <el-header class="header">
         <div class="header-left">
-          <el-button :icon="IconMenu" @click="isCollapse = !isCollapse" class="menu-toggle" circle />
+          <el-button class="menu-toggle" circle @click="isCollapse = !isCollapse">
+            <el-icon><IconMenu /></el-icon>
+          </el-button>
           <div class="header-title" v-if="!isCollapse">
             {{ route.meta.title || '公寓管理系统' }}
           </div>
@@ -117,7 +124,6 @@ const handleLogout = () => {
             <span class="admin-text">{{ realName }}</span>
           </div>
           <el-button
-            icon="Logout"
             type="text"
             class="logout-btn"
             @click="handleLogout"

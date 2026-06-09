@@ -25,5 +25,13 @@ export const authApi = {
       method: 'post',
       data
     })
+  },
+  
+  changePassword(data: { userId: number; oldPassword: string; newPassword: string }): Promise<any> {
+    return request({
+      url: '/auth/changePassword',
+      method: 'post',
+      data
+    })
   }
 }
