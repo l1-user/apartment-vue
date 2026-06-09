@@ -2,16 +2,22 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElContainer, ElAside, ElHeader, ElMain, ElMenu, ElSubMenu, ElMenuItem, ElButton, ElIcon } from 'element-plus'
-import { Menu as IconMenu, Histogram, House, User, Key, Money, SwitchButton, Tools, DataAnalysis } from '@element-plus/icons-vue'
+import { Menu as IconMenu, Histogram, House, User, Key, Money, SwitchButton, Tools, DataAnalysis, Logout } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 const isCollapse = ref(false)
 
 const currentPath = computed(() => route.path)
+const realName = computed(() => localStorage.getItem('realName') || '管理员')
 
 const handleMenuClick = (path: string) => {
   router.push(path)
+}
+
+const handleLogout = () => {
+  localStorage.clear()
+  router.push('/login')
 }
 </script>
 
@@ -108,8 +114,16 @@ const handleMenuClick = (path: string) => {
         <div class="header-right">
           <div class="admin-card">
             <span class="admin-icon">👤</span>
-            <span class="admin-text">管理员</span>
+            <span class="admin-text">{{ realName }}</span>
           </div>
+          <el-button
+            icon="Logout"
+            type="text"
+            class="logout-btn"
+            @click="handleLogout"
+          >
+            退出登录
+          </el-button>
         </div>
       </el-header>
       <el-main class="main-content">
@@ -395,6 +409,20 @@ const handleMenuClick = (path: string) => {
   color: #334155;
   font-size: 14px;
   font-weight: 500;
+}
+
+.logout-btn {
+  margin-left: 16px;
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
 }
 
 .main-content {

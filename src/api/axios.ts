@@ -28,8 +28,8 @@ instance.interceptors.response.use(
         ElMessage.error(msg)
         return Promise.reject(new Error(msg))
       }
-      // 成功时返回明确的 true，让业务层按 boolean 判断
-      return true
+      // 成功时返回完整数据，让业务层能够获取登录信息
+      return data
     }
 
     // 情况 2：后端 Controller 直接返回 boolean (true/false)

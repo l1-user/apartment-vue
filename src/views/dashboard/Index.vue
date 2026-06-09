@@ -214,9 +214,12 @@ const loadStats = async () => {
     }
     if (roomStats.status === 'fulfilled' && roomStats.value && typeof roomStats.value === 'object') {
       const counts: { [key: number]: number } = {}
-      Object.entries(roomStats.value as Record<string, number>).forEach(([k, v]) => {
-        counts[Number(k)] = v
-      })
+      const obj = roomStats.value as Record<string, number>
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          counts[Number(key)] = obj[key]
+        }
+      }
       stats.roomStatusCounts = counts
     }
 

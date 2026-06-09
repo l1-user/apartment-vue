@@ -2,6 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/login/Index.vue'),
+    meta: { title: '登录' }
+  },
+  {
+    path: '/tenant-portal',
+    name: 'TenantPortal',
+    component: () => import('@/views/tenantPortal/Index.vue'),
+    meta: { title: '租户中心' }
+  },
+  {
     path: '/',
     name: 'Layout',
     component: () => import('@/layout/Index.vue'),
@@ -26,6 +38,39 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  const userType = localStorage.getItem('userType')
+
+  if (to.path === '/login') {
+    if (token) {
+      if (userType === '8') {
+        next('/tenant-portal')
+      } else {
+        next('/')
+      }
+    } else {
+      next()
+    }
+  } else if (to.path === '/tenant-portal') {
+    if (!token) {
+      next('/login')
+    } else if (userType !== '8') {
+      next('/')
+    } else {
+      next()
+    }
+  } else {
+    if (!token) {
+      next('/login')
+    } else if (userType === '8') {
+      next('/tenant-portal')
+    } else {
+      next()
+    }
+  }
 })
 
 export default router
