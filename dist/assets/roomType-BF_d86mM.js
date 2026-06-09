@@ -1,1 +1,0 @@
-import{i as o}from"./axios-BUYyygxD.js";const p={getAll:()=>o.get("/roomType/showAll"),getPage:e=>o.get("/roomType/page",{params:e}),getGlobal:()=>o.get("/roomType/global"),getById:e=>o.get(`/roomType/${e}`),save:e=>o.post("/roomType/save",e),update:e=>o.put("/roomType/update",e),delete:e=>o.delete(`/roomType/${e}`)};export{p as r};

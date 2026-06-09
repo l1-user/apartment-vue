@@ -1,1 +1,0 @@
-import{i}from"./axios-BUYyygxD.js";const g={getAll:()=>i.get("/building/showAll"),getPage:e=>i.get("/building/page",{params:e}),getById:e=>i.get(`/building/${e}`),listByStore:e=>i.get(`/building/listByStore/${e}`),save:e=>i.post("/building/save",e),update:e=>i.put("/building/update",e),delete:e=>i.delete(`/building/${e}`)};export{g as b};
