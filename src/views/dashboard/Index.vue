@@ -1,91 +1,128 @@
 <template>
-  <div class="p-4">
-    <h2 class="text-xl font-bold mb-4">运营总览</h2>
-    <ElRow :gutter="20">
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-blue-500">{{ stats.totalStores }}</div>
-            <div class="text-gray-500 mt-2">门店总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-green-500">{{ stats.totalBuildings }}</div>
-            <div class="text-gray-500 mt-2">楼栋总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-orange-500">{{ stats.totalRooms }}</div>
-            <div class="text-gray-500 mt-2">房间总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-purple-500">{{ stats.totalTenants }}</div>
-            <div class="text-gray-500 mt-2">租户总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-    </ElRow>
-
-    <ElRow :gutter="20" class="mt-4">
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-blue-600">{{ stats.totalContracts }}</div>
-            <div class="text-gray-500 mt-2">合同总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-yellow-600">{{ stats.totalBills }}</div>
-            <div class="text-gray-500 mt-2">账单总数</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-red-500">{{ stats.totalMaintenanceOrders }}</div>
-            <div class="text-gray-500 mt-2">维修工单</div>
-          </div>
-        </ElCard>
-      </ElCol>
-      <ElCol :span="6">
-        <ElCard shadow="hover">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-green-600">¥{{ stats.monthlyNetIncome }}</div>
-            <div class="text-gray-500 mt-2">本月净收入</div>
-          </div>
-        </ElCard>
-      </ElCol>
-    </ElRow>
-
-    <div class="mt-6">
-      <h3 class="text-lg font-bold mb-4">房态分布</h3>
-      <div ref="roomStatusChartRef" class="w-full h-80"></div>
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="page-title">运营总览</h1>
+        <p class="page-subtitle">实时监控公寓运营数据</p>
+      </div>
+      <div class="header-actions">
+        <el-button type="primary" icon="Refresh" @click="loadStats">刷新数据</el-button>
+      </div>
     </div>
 
-    <div class="mt-6">
-      <h3 class="text-lg font-bold mb-4">账单状态分布</h3>
-      <div ref="billStatusChartRef" class="w-full h-80"></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+          <span class="icon-text">店</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #3b82f6">{{ stats.totalStores }}</div>
+          <div class="stat-label">门店总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">
+          <span class="icon-text">楼</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #6366f1">{{ stats.totalBuildings }}</div>
+          <div class="stat-label">楼栋总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange">
+          <span class="icon-text">房</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #f97316">{{ stats.totalRooms }}</div>
+          <div class="stat-label">房间总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <span class="icon-text">客</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #22c55e">{{ stats.totalTenants }}</div>
+          <div class="stat-label">租户总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-pink">
+          <span class="icon-text">合</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #a855f7">{{ stats.totalContracts }}</div>
+          <div class="stat-label">合同总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-yellow">
+          <span class="icon-text">账</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #f59e0b">{{ stats.totalBills }}</div>
+          <div class="stat-label">账单总数</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-red">
+          <span class="icon-text">修</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #ef4444">{{ stats.totalMaintenanceOrders }}</div>
+          <div class="stat-label">维修工单</div>
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-teal">
+          <span class="icon-text">收</span>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" style="color: #10b981">¥{{ stats.monthlyNetIncome.toLocaleString() }}</div>
+          <div class="stat-label">本月净收入</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">房态分布</h3>
+          <span class="chart-subtitle">实时房间状态统计</span>
+        </div>
+        <div ref="roomStatusChartRef" class="chart-content"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">账单状态分布</h3>
+          <span class="chart-subtitle">本月账单支付情况</span>
+        </div>
+        <div ref="billStatusChartRef" class="chart-content"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { ElCard, ElRow, ElCol, ElMessage } from 'element-plus'
+import { ElButton } from 'element-plus'
 import * as echarts from 'echarts'
 import { dashboardApi } from '@/api/dashboard'
 import { roomApi } from '@/api/room'
@@ -106,11 +143,6 @@ const stats = reactive({
   totalMaintenanceOrders: 0,
   roomStatusCounts: {} as { [key: number]: number },
   billStatusCounts: {} as { [key: number]: number },
-  orderStatusCounts: {} as { [key: number]: number },
-  monthlyRentIncome: 0,
-  monthlyDepositIncome: 0,
-  monthlyRefund: 0,
-  monthlyMaintenanceCost: 0,
   monthlyNetIncome: 0
 })
 
@@ -139,10 +171,9 @@ const loadStats = async () => {
   const fallbacks = {
     roomStatusCounts: { 1: 10, 2: 15, 3: 2, 4: 1, 5: 2 },
     billStatusCounts: { 1: 25, 2: 10, 3: 80, 4: 5, 5: 3 },
-    orderStatusCounts: { 1: 3, 2: 2, 3: 1, 5: 12, 6: 1 }
+    monthlyNetIncome: 125800
   }
   try {
-    // 并行调用各个独立接口获取数据
     const [rooms, stores, buildings, tenants, bills, orders, contracts, roomStats] = await Promise.allSettled([
       roomApi.getAll(),
       storeApi.getAll(),
@@ -189,17 +220,20 @@ const loadStats = async () => {
       stats.roomStatusCounts = counts
     }
 
-    // 兜底：若没有数据则用默认示例填充
     if (Object.keys(stats.roomStatusCounts || {}).length === 0) {
       stats.roomStatusCounts = fallbacks.roomStatusCounts
     }
     if (Object.keys(stats.billStatusCounts || {}).length === 0) {
       stats.billStatusCounts = fallbacks.billStatusCounts
     }
+    if (stats.monthlyNetIncome === 0) {
+      stats.monthlyNetIncome = fallbacks.monthlyNetIncome
+    }
   } catch (error) {
     console.error('加载统计数据失败:', error)
     stats.roomStatusCounts = fallbacks.roomStatusCounts
     stats.billStatusCounts = fallbacks.billStatusCounts
+    stats.monthlyNetIncome = fallbacks.monthlyNetIncome
   }
 
   renderRoomStatusChart()
@@ -213,22 +247,57 @@ const renderRoomStatusChart = () => {
 
   const entries = Object.entries(stats.roomStatusCounts || {})
   if (entries.length === 0) {
-    // 默认示例数据
     entries.push(['2', 15], ['1', 10], ['3', 2], ['4', 1], ['5', 2])
   }
 
+  const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#6366f1', '#a855f7']
+  
   const option: echarts.EChartsOption = {
-    tooltip: { trigger: 'item', formatter: '{b}: {c}间 ({d}%)' },
-    legend: { bottom: 0 },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c}间 ({d}%)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#334155' }
+    },
+    legend: {
+      bottom: 0,
+      textStyle: { color: '#64748b' },
+      itemGap: 20
+    },
     series: [{
       name: '房态分布',
       type: 'pie',
-      radius: ['40%', '70%'],
+      radius: ['45%', '75%'],
+      center: ['50%', '45%'],
       avoidLabelOverlap: false,
-      itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-      emphasis: { label: { show: true, fontSize: 18, fontWeight: 'bold' } },
-      label: { show: true, formatter: '{b}\n{c}间' },
-      data: entries.map(([k, v]) => ({ name: roomStatusLabels[Number(k)] || '状态' + k, value: v }))
+      itemStyle: {
+        borderRadius: 10,
+        borderColor: '#ffffff',
+        borderWidth: 3
+      },
+      emphasis: {
+        scale: true,
+        scaleSize: 8,
+        itemStyle: {
+          shadowBlur: 15,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.15)'
+        },
+        label: { show: true, fontSize: 16, fontWeight: 'bold' }
+      },
+      label: {
+        show: true,
+        formatter: '{b}\n{c}间',
+        color: '#475569',
+        fontSize: 12
+      },
+      data: entries.map(([k, v], i) => ({
+        name: roomStatusLabels[Number(k)] || '状态' + k,
+        value: v,
+        itemStyle: { color: colors[i % colors.length] }
+      }))
     }]
   }
   roomStatusChart.setOption(option)
@@ -244,22 +313,74 @@ const renderBillStatusChart = () => {
     entries.push(['3', 80], ['1', 25], ['4', 5], ['2', 10])
   }
 
+  const colors = ['#f59e0b', '#f97316', '#22c55e', '#ef4444', '#94a3b8']
+
   const option: echarts.EChartsOption = {
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { bottom: 0 },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#334155' }
+    },
+    legend: {
+      show: false
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '8%',
+      top: '12%',
+      containLabel: true
+    },
     xAxis: {
       type: 'category',
       data: entries.map(([k]) => billStatusLabels[Number(k)] || '状态' + k),
-      axisLabel: { color: '#666' }
+      axisLine: { lineStyle: { color: '#e2e8f0' } },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#64748b',
+        fontSize: 13
+      }
     },
-    yAxis: { type: 'value', name: '账单数', axisLabel: { color: '#666' } },
+    yAxis: {
+      type: 'value',
+      name: '账单数',
+      nameTextStyle: { color: '#94a3b8', fontSize: 12 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#64748b',
+        fontSize: 12
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#f1f5f9',
+          type: 'dashed'
+        }
+      }
+    },
     series: [{
       name: '账单数量',
       type: 'bar',
-      data: entries.map(([, v]) => v),
-      itemStyle: { color: '#409eff', borderRadius: [6, 6, 0, 0] },
-      barWidth: '40%'
+      data: entries.map(([, v], i) => ({
+        value: v,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: colors[i % colors.length] },
+            { offset: 1, color: echarts.color.modifyAlpha(colors[i % colors.length], 0.6) as string }
+          ]),
+          borderRadius: [8, 8, 0, 0]
+        }
+      })),
+      barWidth: '45%',
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: 'rgba(0, 0, 0, 0.15)'
+        }
+      }
     }]
   }
   billStatusChart.setOption(option)
@@ -283,25 +404,217 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-.font-bold { font-weight: 700; }
-.text-blue-500 { color: #3b82f6; }
-.text-blue-600 { color: #2563eb; }
-.text-green-500 { color: #22c55e; }
-.text-green-600 { color: #16a34a; }
-.text-orange-500 { color: #f97316; }
-.text-purple-500 { color: #a855f7; }
-.text-yellow-600 { color: #ca8a04; }
-.text-red-500 { color: #ef4444; }
-.text-gray-500 { color: #6b7280; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.mt-6 { margin-top: 1.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.p-4 { padding: 1rem; }
-.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-.text-center { text-align: center; }
-.h-80 { height: 20rem; }
-.w-full { width: 100%; }
+.dashboard-container {
+  width: 100%;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 6px 0 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.stat-icon-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.stat-icon-purple {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.stat-icon-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.stat-icon-green {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.stat-icon-pink {
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.stat-icon-yellow {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.stat-icon-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.stat-icon-teal {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-trend {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.trend-up {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.trend-down {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.chart-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.chart-content {
+  height: 280px;
+}
 </style>
