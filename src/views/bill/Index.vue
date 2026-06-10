@@ -53,7 +53,7 @@
       <ElTable-column label="操作" width="260" fixed="right">
         <template #default="{ row }">
           <ElButton type="primary" link size="small" @click="openDialog(row)">编辑</ElButton>
-          <ElButton v-if="row.billStatus !== 3" type="success" link size="small" @click="payBill(row)">收款</ElButton>
+          
           <ElButton type="danger" link size="small" @click="deleteBill(row)">删除</ElButton>
         </template>
       </ElTable-column>
