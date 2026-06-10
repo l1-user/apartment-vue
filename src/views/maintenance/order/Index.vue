@@ -22,6 +22,7 @@
         <ElButton type="primary" @click="loadList">查询</ElButton>
         <ElButton type="success" @click="openDialog()">新增工单</ElButton>
         <ElButton @click="loadList">刷新</ElButton>
+        <ElButton type="info" icon="Brain" @click="showRecommendModal = true">AI智能派单</ElButton>
       </ElForm-item>
     </ElForm>
     <ElTable :data="filteredList" border stripe>
@@ -131,6 +132,35 @@
         <ElButton type="primary" @click="save">确定</ElButton>
       </template>
     </ElDialog>
+
+    <ElDialog v-model="showRecommendModal" title="AI智能派单" width="600px">
+      <ElForm :model="recommendForm" label-width="100px">
+        <ElForm-item label="选择工单">
+          <ElSelect v-model="recommendForm.workOrderId" placeholder="请选择工单" style="width: 100%">
+            <ElOption
+              v-for="order in pendingOrders"
+              :key="order.id"
+              :label="`${order.orderNo || '工单' + order.id} - ${order.description}`"
+              :value="order.id"
+            />
+          </ElSelect>
+        </ElForm-item>
+      </ElForm>
+      <div v-if="recommendResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-semibold mb-2">AI推荐结果</h4>
+        <p class="text-gray-600">{{ recommendResult.reason }}</p>
+        <div v-if="recommendResult.recommendedWorkerIds?.length" class="mt-2">
+          <span class="text-sm text-gray-500">推荐人员ID: </span>
+          <span class="text-primary">{{ recommendResult.recommendedWorkerIds.join(', ') }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <ElButton @click="showRecommendModal = false">关闭</ElButton>
+        <ElButton type="primary" @click="getRecommend" :disabled="!recommendForm.workOrderId || isRecommendLoading">
+          {{ isRecommendLoading ? '推荐中...' : '获取推荐' }}
+        </ElButton>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
@@ -140,6 +170,7 @@ import { ElTable, ElTableColumn, ElButton, ElForm, ElFormItem, ElSelect, ElOptio
 import type { MaintenanceOrder, Store } from '@/types'
 import { maintenanceOrderApi } from '@/api/maintenanceOrder'
 import { storeApi } from '@/api/store'
+import { aiApi } from '@/api/ai'
 
 const list = ref<MaintenanceOrder[]>([])
 const stores = ref<Store[]>([])
@@ -148,6 +179,11 @@ const filters = reactive({ category: '' as string | undefined, orderStatus: unde
 const dialogVisible = ref(false)
 const formRef = ref()
 const form = reactive<Partial<MaintenanceOrder>>({ orderStatus: 1, urgencyLevel: 2, category: '水电' })
+
+const showRecommendModal = ref(false)
+const isRecommendLoading = ref(false)
+const recommendForm = reactive({ workOrderId: undefined as number | undefined })
+const recommendResult = ref<{ recommendedWorkerIds: number[]; reason: string } | null>(null)
 const rules = {
   storeId: [{ required: true, message: '请选择所属门店', trigger: 'change' }],
   roomId: [{ required: true, message: '请输入房间ID', trigger: 'blur' }],
@@ -161,6 +197,10 @@ const filteredList = computed(() => {
   if (filters.category) result = result.filter(o => o.category === filters.category)
   if (filters.orderStatus) result = result.filter(o => o.orderStatus === filters.orderStatus)
   return result
+})
+
+const pendingOrders = computed(() => {
+  return list.value.filter(o => o.orderStatus === 1)
 })
 
 const getStoreName = (id?: number) => stores.value.find(s => s.id === id)?.storeName || '-'
@@ -212,6 +252,20 @@ const deleteRow = (row: MaintenanceOrder) => {
         if (ok === true) { ElMessage.success('删除成功'); loadList() } else ElMessage.error('删除失败')
       } catch (e) { ElMessage.error('删除失败，请检查后端服务') }
     }).catch(() => {})
+}
+
+const getRecommend = async () => {
+  if (!recommendForm.workOrderId) return
+  isRecommendLoading.value = true
+  recommendResult.value = null
+  try {
+    const res = await aiApi.recommendWorker(recommendForm.workOrderId)
+    recommendResult.value = res
+  } catch (e) {
+    ElMessage.error('获取推荐失败')
+  } finally {
+    isRecommendLoading.value = false
+  }
 }
 
 onMounted(() => { loadStores(); loadList() })

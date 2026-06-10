@@ -151,6 +151,10 @@
               <Wallet />
               <span>在线缴费</span>
             </el-button>
+            <el-button @click="showAiChatModal = true" class="action-btn ai-btn">
+              <Message />
+              <span>智能客服</span>
+            </el-button>
           </div>
         </div>
       </div>
@@ -498,15 +502,47 @@
         <el-button type="primary" @click="handlePaymentSubmit">确认缴费</el-button>
       </template>
     </el-dialog>
+
+    <!-- AI智能客服弹窗 -->
+    <el-dialog title="智能客服" v-model="showAiChatModal" width="500px">
+      <div class="ai-chat-container">
+        <div class="chat-messages">
+          <div v-if="aiMessages.length === 0" class="empty-chat">
+            <Message style="font-size: 48px; color: #ccc; margin-bottom: 16px;" />
+            <p>有什么问题可以问我哦~</p>
+          </div>
+          <div
+            v-for="(msg, index) in aiMessages"
+            :key="index"
+            :class="['message', msg.isUser ? 'user' : 'ai']"
+          >
+            <div class="avatar">{{ msg.isUser ? '我' : 'AI' }}</div>
+            <div class="content">{{ msg.content }}</div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <el-input
+            v-model="aiInputMessage"
+            placeholder="输入您的问题..."
+            @keyup.enter="sendAiMessage"
+            :disabled="isAiLoading"
+          />
+          <el-button type="primary" @click="sendAiMessage" :disabled="!aiInputMessage.trim() || isAiLoading">
+            {{ isAiLoading ? '发送中...' : '发送' }}
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { User, CircleCheck, Key, Tools, ArrowRight, HomeFilled, Wallet } from '@element-plus/icons-vue'
+import { User, CircleCheck, Key, Tools, ArrowRight, HomeFilled, Wallet, Message } from '@element-plus/icons-vue'
 import { tenantPortalApi, bookingApi, paymentApi } from '@/api/tenantPortal'
 import { maintenanceOrderApi } from '@/api/maintenanceOrder'
 import { authApi } from '@/api/auth'
+import { aiApi } from '@/api/ai'
 import type { LoginResponse } from '@/api/auth'
 
 const userInfo = ref<LoginResponse['data'] | null>(null)
@@ -534,6 +570,7 @@ const showMaintenanceDetailModal = ref(false)
 const showPasswordModal = ref(false)
 const showBookingModal = ref(false)
 const showPaymentModal = ref(false)
+const showAiChatModal = ref(false)
 const selectedRoom = ref<any>(null)
 const selectedContract = ref<any>(null)
 const selectedBill = ref<any>(null)
@@ -579,6 +616,28 @@ const paymentForm = ref({
 })
 
 const unpaidBills = ref<any[]>([])
+
+const aiMessages = ref<{ content: string; isUser: boolean }[]>([])
+const aiInputMessage = ref('')
+const isAiLoading = ref(false)
+
+const sendAiMessage = async () => {
+  if (!aiInputMessage.value.trim() || isAiLoading.value) return
+
+  aiMessages.value.push({ content: aiInputMessage.value, isUser: true })
+  const tempMessage = aiInputMessage.value
+  aiInputMessage.value = ''
+  isAiLoading.value = true
+
+  try {
+    const res = await aiApi.answerTenantQuestion({ tenantId: userInfo.value?.id || 0, question: tempMessage })
+    aiMessages.value.push({ content: res.answer, isUser: false })
+  } catch (e) {
+    aiMessages.value.push({ content: '抱歉，智能客服暂时不可用', isUser: false })
+  } finally {
+    isAiLoading.value = false
+  }
+}
 
 const formatAmount = (amount: any): string => {
   if (amount == null || amount === undefined) {
@@ -1209,5 +1268,103 @@ onMounted(() => {
 .room-info-card.no-room {
   background: #909399;
   text-align: center;
+}
+
+.ai-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #fff !important;
+}
+
+.ai-btn :deep(svg) {
+  color: #fff !important;
+}
+
+.ai-chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 16px;
+  max-width: 85%;
+}
+
+.message.user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.message.ai {
+  margin-right: auto;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.message.user .avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.message.ai .avatar {
+  background: #10b981;
+  color: white;
+}
+
+.content {
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 8px;
+}
+
+.message.user .content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 18px 4px 18px 18px;
+}
+
+.message.ai .content {
+  background: #f5f5f5;
+  color: #333;
+  border-radius: 4px 18px 18px 18px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+.chat-input :deep(.el-input) {
+  flex: 1;
 }
 </style>

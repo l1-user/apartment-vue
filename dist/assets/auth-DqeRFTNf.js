@@ -1,0 +1,1 @@
+import{j as o}from"./index-CmkVFiOu.js";const r={login(t){return o({url:"/auth/login",method:"post",data:t})},changePassword(t){return o({url:"/auth/changePassword",method:"post",data:t})}};export{r as a};

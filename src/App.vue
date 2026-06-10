@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import AiAssistant from './components/AiAssistant.vue'
 </script>
 
 <template>
   <div>
     <router-view />
+    <AiAssistant />
   </div>
 </template>
 
