@@ -153,12 +153,12 @@ const loadData = async () => {
   // 财务报表使用内置模拟数据。如需对接真实业务数据，
   // 请在后端添加 /api/dashboard/financeStats 接口并在此处调用
   const mockMonthly = [
-    { month: '2024-01', rent: 25000, deposit: 8000, refund: 0, maintenance: 500 },
-    { month: '2024-02', rent: 26000, deposit: 4000, refund: 2000, maintenance: 800 },
-    { month: '2024-03', rent: 28000, deposit: 6000, refund: 0, maintenance: 300 },
-    { month: '2024-04', rent: 24000, deposit: 2000, refund: 3500, maintenance: 600 },
-    { month: '2024-05', rent: 22000, deposit: 5000, refund: 3000, maintenance: 1000 },
-    { month: '2024-06', rent: 25000, deposit: 10000, refund: 0, maintenance: 0 }
+    { month: '2026-01', rent: 32000, deposit: 12000, refund: 500, maintenance: 800 },
+    { month: '2026-02', rent: 31000, deposit: 8000, refund: 1500, maintenance: 1200 },
+    { month: '2026-03', rent: 35000, deposit: 9000, refund: 800, maintenance: 600 },
+    { month: '2026-04', rent: 33000, deposit: 7000, refund: 2000, maintenance: 900 },
+    { month: '2026-05', rent: 36000, deposit: 11000, refund: 1200, maintenance: 1500 },
+    { month: '2026-06', rent: 34000, deposit: 13000, refund: 600, maintenance: 700 }
   ]
   mockMonthly.forEach(m => { m.net = m.rent + m.deposit - m.refund - m.maintenance })
 

@@ -20,12 +20,15 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => {
     const data = response.data
+    const config = response.config as any
 
     // 情况 1：后端返回 { success, message, data } 格式的对象
     if (data !== null && typeof data === 'object' && 'success' in data) {
       if (data.success === false) {
         const msg = data.message || '操作失败'
-        ElMessage.error(msg)
+        if (!config.hideError) {
+          ElMessage.error(msg)
+        }
         return Promise.reject(new Error(msg))
       }
       // 成功时返回完整数据，让业务层能够获取登录信息
@@ -35,7 +38,9 @@ instance.interceptors.response.use(
     // 情况 2：后端 Controller 直接返回 boolean (true/false)
     if (typeof data === 'boolean') {
       if (data === false) {
-        ElMessage.error('操作失败')
+        if (!config.hideError) {
+          ElMessage.error('操作失败')
+        }
         return Promise.reject(new Error('操作失败'))
       }
       return true
@@ -46,6 +51,10 @@ instance.interceptors.response.use(
   },
   (error) => {
     console.error('API Error:', error)
+    const config = error.config as any
+    if (config?.hideError) {
+      return Promise.reject(error)
+    }
     let msg = '接口请求失败'
     if (error.response) {
       const status = error.response.status

@@ -6,6 +6,7 @@
         <p>欢迎回来，{{ userInfo?.realName }}</p>
       </div>
       <div class="header-actions">
+        <el-button @click="refreshData" type="primary">刷新</el-button>
         <el-button @click="handleLogout" type="danger">退出登录</el-button>
       </div>
     </div>
@@ -414,27 +415,44 @@
     <!-- 租赁申请弹窗 -->
     <el-dialog title="租赁申请" v-model="showBookingModal" width="500px">
       <el-form :model="bookingForm" label-width="100px">
-        <el-form-item label="选择房间">
+        <el-form-item label="合同编号">
+          <el-input v-model="bookingForm.contractNo" placeholder="自动生成" disabled />
+        </el-form-item>
+        <el-form-item label="选择房间" prop="roomId">
           <el-select v-model="bookingForm.roomId" placeholder="请选择要租赁的房间">
-            <el-option v-for="room in availableRooms" :key="room.id" :label="room.roomNo" :value="room.id" />
+            <el-option v-for="room in availableRooms" :key="room.id" :label="room.roomCode || room.roomNo" :value="room.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="房间信息" v-if="selectedBookingRoom">
-          <el-input :value="selectedBookingRoom.roomNo + ' - ' + selectedBookingRoom.roomTypeName" disabled />
+          <el-input :value="(selectedBookingRoom.roomCode || selectedBookingRoom.roomNo) + ' - ' + (selectedBookingRoom.typeName || selectedBookingRoom.roomTypeName)" disabled />
+        </el-form-item>
+        <el-form-item label="开始日期" prop="startDate">
+          <el-date-picker v-model="bookingForm.startDate" type="date" placeholder="选择开始日期" value-format="YYYY-MM-DD" />
+        </el-form-item>
+        <el-form-item label="结束日期" prop="endDate">
+          <el-date-picker v-model="bookingForm.endDate" type="date" placeholder="选择结束日期" value-format="YYYY-MM-DD" />
+        </el-form-item>
+        <el-form-item label="月租金" v-if="selectedBookingRoom">
+          <el-input v-model="bookingForm.rentAmount" :placeholder="'默认: ' + (selectedBookingRoom.currentRent || selectedBookingRoom.rentAmount)" />
+        </el-form-item>
+        <el-form-item label="押金" v-if="selectedBookingRoom">
+          <el-input v-model="bookingForm.depositAmount" :placeholder="'默认: ' + (selectedBookingRoom.depositAmount || selectedBookingRoom.deposit)" />
         </el-form-item>
         <el-form-item label="租期(月)">
-          <el-select v-model="bookingForm.leaseTerm" placeholder="请选择租期">
+          <el-select v-model="bookingForm.leaseTerm">
             <el-option label="3个月" :value="3" />
             <el-option label="6个月" :value="6" />
             <el-option label="12个月" :value="12" />
             <el-option label="24个月" :value="24" />
           </el-select>
         </el-form-item>
-        <el-form-item label="月租金" v-if="selectedBookingRoom">
-          <el-input :value="selectedBookingRoom?.rentAmount" disabled />
-        </el-form-item>
-        <el-form-item label="押金" v-if="selectedBookingRoom">
-          <el-input :value="selectedBookingRoom?.depositAmount" disabled />
+        <el-form-item label="付款方式">
+          <el-select v-model="bookingForm.paymentMethod">
+            <el-option label="月付" value="月付" />
+            <el-option label="季付" value="季付" />
+            <el-option label="半年付" value="半年付" />
+            <el-option label="年付" value="年付" />
+          </el-select>
         </el-form-item>
         <el-form-item label="备注">
           <el-input type="textarea" v-model="bookingForm.remark" placeholder="请输入备注信息" :rows="3" />
@@ -540,7 +558,14 @@ const checkoutForm = ref({
 })
 
 const bookingForm = ref({
-  roomId: '',
+  contractNo: '',
+  tenantId: 0,
+  roomId: 0,
+  startDate: '',
+  endDate: '',
+  rentAmount: '',
+  depositAmount: '',
+  paymentMethod: '月付',
   leaseTerm: 12,
   remark: ''
 })
@@ -852,8 +877,14 @@ const handleChangePassword = async () => {
 watch(() => bookingForm.value.roomId, (newRoomId) => {
   if (newRoomId) {
     selectedBookingRoom.value = availableRooms.value.find(room => room.id === newRoomId)
+    if (selectedBookingRoom.value) {
+      bookingForm.value.rentAmount = selectedBookingRoom.value.currentRent || selectedBookingRoom.value.rentAmount || ''
+      bookingForm.value.depositAmount = selectedBookingRoom.value.depositAmount || selectedBookingRoom.value.deposit || ''
+    }
   } else {
     selectedBookingRoom.value = null
+    bookingForm.value.rentAmount = ''
+    bookingForm.value.depositAmount = ''
   }
 })
 
@@ -862,29 +893,58 @@ const handleBookingSubmit = async () => {
     alert('请选择要租赁的房间')
     return
   }
-  if (!bookingForm.value.leaseTerm) {
-    alert('请选择租期')
+  if (!bookingForm.value.startDate) {
+    alert('请选择开始日期')
+    return
+  }
+  if (!bookingForm.value.endDate) {
+    alert('请选择结束日期')
+    return
+  }
+  if (!bookingForm.value.rentAmount) {
+    alert('请输入租金')
+    return
+  }
+  if (!bookingForm.value.depositAmount) {
+    alert('请输入押金')
     return
   }
   
   try {
-    const response = await bookingApi.submitBooking({
-      userId: userInfo.value?.userId || 0,
+    const contractData = {
+      contractNo: 'HT' + Date.now(),
+      tenantId: userInfo.value?.userId || 0,
       roomId: bookingForm.value.roomId,
-      leaseTerm: bookingForm.value.leaseTerm,
+      startDate: bookingForm.value.startDate,
+      endDate: bookingForm.value.endDate,
+      rentAmount: bookingForm.value.rentAmount,
+      depositAmount: bookingForm.value.depositAmount,
+      paymentMethod: bookingForm.value.paymentMethod,
+      contractStatus: 1,
+      signDate: bookingForm.value.startDate,
+      leaseTerm: bookingForm.value.leaseTerm || 12,
       remark: bookingForm.value.remark
-    })
+    }
     
-    if (response.success) {
-      alert(response.message)
+    const response = await bookingApi.submitBooking(contractData)
+    
+    if (response) {
+      alert('租赁申请提交成功，等待管理员审核')
       showBookingModal.value = false
       bookingForm.value = {
-        roomId: '',
-        leaseTerm: 12,
+        contractNo: '',
+        tenantId: 0,
+        roomId: 0,
+        startDate: '',
+        endDate: '',
+        rentAmount: '',
+        depositAmount: '',
+        paymentMethod: '月付',
         remark: ''
       }
+      loadData()
     } else {
-      alert(response.message || '提交失败')
+      alert('提交失败')
     }
   } catch (error) {
     console.error('租赁申请失败:', error)
@@ -905,12 +965,21 @@ const loadData = async () => {
     try {
       const statsRes = await tenantPortalApi.getTenantStats(userInfo.value.userId)
       if (statsRes.success) {
-        stats.value = statsRes.data
+        stats.value = {
+          contractCount: 0,
+          activeContractCount: 0,
+          pendingBillCount: 0,
+          pendingOrderCount: 0,
+          pendingCheckoutCount: 0,
+          ...statsRes.data
+        }
       }
 
       const contractsRes = await tenantPortalApi.getTenantContracts(userInfo.value.userId)
-      if (contractsRes.success) {
-        contracts.value = contractsRes.data.slice(0, 5)
+      if (contractsRes && contractsRes.success && contractsRes.data) {
+        contracts.value = [...contractsRes.data].slice(0, 5)
+      } else {
+        contracts.value = []
       }
 
       const billsRes = await tenantPortalApi.getTenantBills(userInfo.value.userId, 1, 100)
@@ -942,6 +1011,10 @@ const loadData = async () => {
   } catch (error) {
     console.error('加载房源失败:', error)
   }
+}
+
+const refreshData = async () => {
+  await loadData()
 }
 
 onMounted(() => {

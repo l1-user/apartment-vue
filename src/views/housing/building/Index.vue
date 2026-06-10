@@ -120,11 +120,12 @@ const openDialog = (row?: Building) => {
 
 const save = async () => {
   try {
-    const ok = form.id
-      ? await buildingApi.update(form as Building) as unknown as boolean
-      : await buildingApi.save(form as Building) as unknown as boolean
+    const res = form.id
+      ? await buildingApi.update(form as Building)
+      : await buildingApi.save(form as Building)
+    const ok = res && (typeof res === 'boolean' ? res : (res.data?.success || res.success))
     if (ok === true) { ElMessage.success(form.id ? '更新成功' : '新增成功'); dialogVisible.value = false; loadList() }
-    else ElMessage.error('保存失败')
+    else ElMessage.error(res?.data?.message || res?.message || '保存失败')
   } catch (e) { ElMessage.error('保存失败，请检查后端服务') }
 }
 

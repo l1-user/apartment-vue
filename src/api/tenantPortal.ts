@@ -1,9 +1,9 @@
 import request from './axios'
 
 export const bookingApi = {
-  submitBooking(data: { userId: number; roomId: number; leaseTerm: number; remark?: string }): Promise<any> {
+  submitBooking(data: any): Promise<any> {
     return request({
-      url: '/booking/apply',
+      url: '/contract/save',
       method: 'post',
       data
     })
@@ -38,14 +38,16 @@ export const tenantPortalApi = {
   getTenantStats(tenantId: number): Promise<any> {
     return request({
       url: `/tenant/stats/${tenantId}`,
-      method: 'get'
+      method: 'get',
+      hideError: true
     })
   },
 
   getTenantContracts(tenantId: number): Promise<any> {
     return request({
       url: `/tenant/contracts/${tenantId}`,
-      method: 'get'
+      method: 'get',
+      hideError: true
     })
   },
 
@@ -53,14 +55,16 @@ export const tenantPortalApi = {
     return request({
       url: `/tenant/bills/${tenantId}`,
       method: 'get',
-      params: { current, size }
+      params: { current, size },
+      hideError: true
     })
   },
 
   getTenantMaintenanceOrders(tenantId: number): Promise<any> {
     return request({
       url: `/tenant/maintenance/orders/${tenantId}`,
-      method: 'get'
+      method: 'get',
+      hideError: true
     })
   },
 
@@ -84,21 +88,24 @@ export const tenantPortalApi = {
     return request({
       url: '/tenant/available-rooms',
       method: 'get',
-      params: { current, size }
+      params: { current, size },
+      hideError: true
     })
   },
 
   getProfile(userId: number): Promise<any> {
     return request({
       url: `/tenant/profile/${userId}`,
-      method: 'get'
+      method: 'get',
+      hideError: true
     })
   },
 
   getCurrentRoom(userId: number): Promise<any> {
     return request({
       url: `/tenant/current-room/${userId}`,
-      method: 'get'
+      method: 'get',
+      hideError: true
     })
   }
 }
