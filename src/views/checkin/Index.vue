@@ -43,7 +43,7 @@
         <template #default="{ row }">
           <ElButton type="primary" link size="small" @click="openDialog(row)">编辑</ElButton>
           <ElButton type="success" link size="small" @click="updateStatus(row, 2)">生效</ElButton>
-          <ElButton type="warning" link size="small" @click="terminate(row)">终止</ElButton>
+          
           <ElButton type="danger" link size="small" @click="deleteContract(row)">删除</ElButton>
         </template>
       </ElTable-column>

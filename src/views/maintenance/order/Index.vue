@@ -51,7 +51,7 @@
       <ElTable-column label="操作" width="240" fixed="right">
         <template #default="{ row }">
           <ElButton type="primary" link size="small" @click="openDialog(row)">编辑</ElButton>
-          <ElButton v-if="row.orderStatus !== 3" type="success" link size="small" @click="markDone(row)">标记完成</ElButton>
+          
           <ElButton type="danger" link size="small" @click="deleteRow(row)">删除</ElButton>
         </template>
       </ElTable-column>
@@ -232,16 +232,6 @@ const save = async () => {
     if (ok === true) { ElMessage.success(form.id ? '更新成功' : '新增成功'); dialogVisible.value = false; loadList() }
     else ElMessage.error('保存失败')
   } catch (e) { ElMessage.error('保存失败，请检查后端服务') }
-}
-
-const markDone = (row: MaintenanceOrder) => {
-  ElMessageBox.confirm(`确定标记工单 ${row.orderNo || row.id} 为已完成?`, '提示', { type: 'warning' })
-    .then(async () => {
-      try {
-        const ok = await maintenanceOrderApi.updateStatus(row.id!, 3, row.assigneeName || '') as unknown as boolean
-        if (ok === true) { ElMessage.success('已完成'); loadList() } else ElMessage.error('操作失败')
-      } catch (e) { ElMessage.error('操作失败，请检查后端服务') }
-    }).catch(() => {})
 }
 
 const deleteRow = (row: MaintenanceOrder) => {
